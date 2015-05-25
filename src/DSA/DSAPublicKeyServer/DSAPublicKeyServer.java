@@ -1,10 +1,12 @@
 package DSA.DSAPublicKeyServer;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import DSA.SHA256;
+
+import java.io.*;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 /**
  * Created by mike on 25.05.15.
@@ -14,19 +16,36 @@ import java.net.Socket;
 public class DSAPublicKeyServer {
     private static final int PORT = 50001;
     private static ServerSocket s_Socket;
+    private static HashMap<String, BigInteger[]> publicKeyDB;
+    private static final String keyDBFile = "/Users/mike/2sem/Kryptographische Protokolle/UE4/src/DSA/DSAPublicKeyServer/publicKey.db";
+
+    private static void initPublicKeyDB() throws IOException {
+        publicKeyDB = new HashMap<String, BigInteger[]>();
+        File file = new File(keyDBFile);
+        BufferedReader in = new BufferedReader(new FileReader(file));
+        String line = null;
+        while ((line = in.readLine()) != null) {
+            String[] strArray = line.split(" ");
+            BigInteger[] bigArray = {
+                new BigInteger(strArray[1]),
+                new BigInteger(strArray[2]),
+                new BigInteger(strArray[3]),
+                new BigInteger(strArray[4])
+            };
+            publicKeyDB.put(strArray[0], bigArray);
+        }
+    }
 
     public static void main(String[] args) {
         try {
             System.out.println("DSAPublicKeyServerThread: up and running");
+            initPublicKeyDB();
             s_Socket = new ServerSocket(PORT);
 
             while (true) {
                 Socket s_incoming = s_Socket.accept();
 
-                Runnable r = new DSAPublicKeyServerThread(s_incoming);
-                Thread t = new Thread(r);
-                t.setName("DSAPublicKeyServerThread");
-                t.start();
+                Runnable r = new DSAPublicKeyServerThread(s_incoming, publicKeyDB);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,9 +64,13 @@ class DSAPublicKeyServerThread implements Runnable {
     private Socket socket;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
+    private HashMap<String, BigInteger[]> publicKeyDB;
 
-    public DSAPublicKeyServerThread(Socket s) {
+    private SHA256 sha;
+    public DSAPublicKeyServerThread(Socket s, HashMap<String, BigInteger[]> publicKeyDB) {
         this.socket = s;
+        this.publicKeyDB = publicKeyDB;
+        sha = new SHA256();
     }
 
     public void run() {
@@ -55,9 +78,13 @@ class DSAPublicKeyServerThread implements Runnable {
             System.out.println(this.getClass().getName() + ": getMMessage");
             this.ois = new ObjectInputStream(socket.getInputStream());
             this.oos = new ObjectOutputStream(socket.getOutputStream());
-            //Message msgObj = (Message)ois.readObject();
-            //oos.writeObject(msgSend);
+            String msg = (String)ois.readObject();
+            System.out.println(this.getClass().getName() + " Search for " + msg + " in publicKeyDB");
 
+            if (publicKeyDB.containsKey(sha.calculateHash(msg))) {
+                System.out.println(this.getClass().getName() + "Found " + msg + " in publicKeyDB");
+                oos.writeObject(publicKeyDB.get(sha.calculateHash(msg)));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
