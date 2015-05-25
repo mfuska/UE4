@@ -38,20 +38,25 @@ public class DSAPublicKeyServer {
 
     public static void main(String[] args) {
         try {
-            System.out.println("DSAPublicKeyServerThread: up and running");
+            System.out.println("DSAPublicKeyServer: started");
             initPublicKeyDB();
+            System.out.println("DSAPublicKeyServer: load public KeyDB");
             s_Socket = new ServerSocket(PORT);
-
+            System.out.println("DSAPublicKeyServer: wait of connections on Port: " + PORT);
             while (true) {
                 Socket s_incoming = s_Socket.accept();
-
+                System.out.println("DSAPublicKeyServer: accept connection on Port: " + PORT);
                 Runnable r = new DSAPublicKeyServerThread(s_incoming, publicKeyDB);
+                Thread t = new Thread(r);
+                t.setName("DSAPublicKeyServerThread");
+                System.out.println("DSAPublicKeyServer: start Thread");
+                t.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                System.out.println("DSAPublicKeyServer: closed");
+                System.out.println("DSAPublicKeyServer: socket closed");
                 s_Socket.close();
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -81,9 +86,11 @@ class DSAPublicKeyServerThread implements Runnable {
             String msg = (String)ois.readObject();
             System.out.println(this.getClass().getName() + " Search for " + msg + " in publicKeyDB");
 
-            if (publicKeyDB.containsKey(sha.calculateHash(msg))) {
-                System.out.println(this.getClass().getName() + "Found " + msg + " in publicKeyDB");
-                oos.writeObject(publicKeyDB.get(sha.calculateHash(msg)));
+            if (publicKeyDB.containsKey(sha.hex2String(sha.calculateHash(msg)))) {
+                System.out.println(this.getClass().getName() + " Found " + msg + " in publicKeyDB");
+                oos.writeObject(publicKeyDB.get(sha.hex2String(sha.calculateHash(msg))));
+            } else {
+                System.out.println(this.getClass().getName() + " not found " + msg + " in publicKeyDB");
             }
         } catch (Exception e) {
             e.printStackTrace();

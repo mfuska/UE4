@@ -31,6 +31,11 @@ public class DSA {
         this.generateX(random);
         this.generateY();
     }
+    public DSA(BigInteger p, BigInteger q, BigInteger g) {
+        this.p = p;
+        this.q = q;
+        this.g = g;
+    }
     private void generateY() {
         //y = g ^ x mod p
         this.y = this.g.modPow(this.x, this.p);
@@ -88,14 +93,19 @@ public class DSA {
     public String getPublicKeyString() {
         return new String(this.p + " " + this.q + " " + this.g + " " + this.y);
     }
-    public String getPrivateKeyString() {
-        return new String(this.p + " " + this.q + " " + this.g + " " + this.x);
-    }
     public BigInteger[] getPrivateKey() {
         BigInteger[] publicKey = {this.p, this.q, this.g, this.x};
         return publicKey;
     }
-
+    public String getPrivateKeyString() {
+        return new String(this.p + " " + this.q + " " + this.g + " " + this.x);
+    }
+    public void setPrivatKey(BigInteger x) {
+        this.x = x;
+    }
+    public void setPublicKey(BigInteger y) {
+        this.y = y;
+    }
     public BigInteger[] sign(String m) throws NoSuchAlgorithmException {
         /*
             1< s <q
@@ -130,7 +140,7 @@ public class DSA {
         return signature;
     }
 
-    public boolean verify(String m, BigInteger[] signatur, BigInteger[] publicKey) throws NoSuchAlgorithmException {
+    public boolean verify(String m, BigInteger[] signatur) throws NoSuchAlgorithmException {
         /*
         geg: s1, s2 --> signatur[]
         m die nachricht
@@ -151,17 +161,13 @@ public class DSA {
         BigInteger s1 = signatur[0];
         BigInteger s2 = signatur[1];
 
-        BigInteger p = publicKey[0];
-        BigInteger q = publicKey[1];
-        BigInteger g = publicKey[2];
-        BigInteger y = publicKey[3];
         // check 1: 0 < s1 < q  && 0 < s2 < q --> not True sig false
-        if ( (s1.compareTo(BigInteger.ZERO) == 1 && s1.compareTo(q) == -1) &&
-                (s2.compareTo(BigInteger.ZERO) == 1 && s2.compareTo(q) == -1) ) {
-            BigInteger w = s2.modInverse(q);
-            BigInteger u1 = sha2hash.multiply(w).mod(q);
-            BigInteger u2 = s1.multiply(w).mod(q);
-            BigInteger v = g.modPow(u1, p).multiply(y.modPow(u2, p)).mod(p).mod(q);
+        if ( (s1.compareTo(BigInteger.ZERO) == 1 && s1.compareTo(this.q) == -1) &&
+                (s2.compareTo(BigInteger.ZERO) == 1 && s2.compareTo(this.q) == -1) ) {
+            BigInteger w = s2.modInverse(this.q);
+            BigInteger u1 = sha2hash.multiply(w).mod(this.q);
+            BigInteger u2 = s1.multiply(w).mod(this.q);
+            BigInteger v = this.g.modPow(u1, this.p).multiply(this.y.modPow(u2, this.p)).mod(this.p).mod(this.q);
 
             return v.compareTo(s1) == 0;
         }
