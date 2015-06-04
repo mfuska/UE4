@@ -33,16 +33,16 @@ public class ClientInitPublicDSAKeyThread extends Thread {
     }
     public void run() {
         try {
-            System.out.println(this.getName() + "Open Socket.....");
+            System.out.println(this.getName() + " Open Socket.....");
            c_socket = new Socket("localhost", this.port);
 
            oos = new ObjectOutputStream(c_socket.getOutputStream());
            ois = new ObjectInputStream(c_socket.getInputStream());
            BigInteger[] dsaPublicKey = null;
            if (! publicKeyDB.containsKey(this.name)) {
-               System.out.println(this.getName() + "Write to socket ......");
+               System.out.println(this.getName() + " Write to socket ......");
                oos.writeObject(this.name);
-               System.out.println(this.getName() + "Read answer from socket ......");
+               System.out.println(this.getName() + " Read answer from socket ......");
                dsaPublicKey = (BigInteger[]) ois.readObject();
                publicKeyDB.put(this.name, dsaPublicKey);
             }

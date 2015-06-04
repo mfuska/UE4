@@ -17,7 +17,7 @@ public class DSAPublicKeyServer {
     private static final int PORT = 50001;
     private static ServerSocket s_Socket;
     private static HashMap<String, BigInteger[]> publicKeyDB;
-    private static final String keyDBFile = "/Users/mike/2sem/Kryptographische Protokolle/UE4/src/DSA/DSAPublicKeyServer/publicKey.db";
+    private static final String keyDBFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/DSAPublicKeyServer/publicKey.db";
 
     private static void initPublicKeyDB() throws IOException {
         publicKeyDB = new HashMap<String, BigInteger[]>();
