@@ -11,6 +11,7 @@ import java.util.HashMap;
 public class ClientDSA {
     private final static int PORT = 50001;
     private final static String privateKeyFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/Client/privateKey.db";
+    private final static String authServerFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/Client/authServerPublicKey.db";
 
     private HashMap<String, BigInteger[]> publicKeyDB;
     private BigInteger[] privateKey;
@@ -19,6 +20,7 @@ public class ClientDSA {
     public ClientDSA() {
         this.publicKeyDB = new HashMap<String, BigInteger[]>();
         readPrivatKey(name);
+        readPublicKeyAuthServer();
         readPublicKey(name);
         String message = "Test";
         try {
@@ -32,6 +34,17 @@ public class ClientDSA {
             e.printStackTrace();
         }
 
+    }
+    private void readPublicKeyAuthServer() {
+        ResultPublicAuthServerSetter setter = new ResultPublicAuthServerSetter() {
+            public void setResultSetter(HashMap<String, BigInteger[]> pKey) {
+                publicKeyDB = pKey;
+            }
+        };
+        ClientInitPublicAuthServerKeyThread t = new ClientInitPublicAuthServerKeyThread(publicKeyDB, authServerFile);
+        t.setName("ClientInitPublicAuthServerKeyThread");
+        t.setResultSetter(setter);
+        t.start();
     }
     private void readPrivatKey(String name) {
         ResultPrivateKeySetter setter = new ResultPrivateKeySetter() {
@@ -56,6 +69,11 @@ public class ClientDSA {
         t.setName("ClientInitPublicDSAKeyThread");
         t.setResultSetter(setter);
         t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
     private Boolean checkSignature(BigInteger[] dsaPublicKey, BigInteger[] sig, String message) throws Exception {
