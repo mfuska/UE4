@@ -1,8 +1,10 @@
 package DSA.Client;
 
 import DSA.DSA;
+import DSA.MessagesSend;
 
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 /**
@@ -15,25 +17,23 @@ public class ClientDSA {
 
     private HashMap<String, BigInteger[]> publicKeyDB;
     private BigInteger[] privateKey;
+    private int logTime;
+    private String nameA = "michi";
+    private String nameB = "daniel";
 
-    private String name = "michi";
     public ClientDSA() {
+        this.logTime = 0;
         this.publicKeyDB = new HashMap<String, BigInteger[]>();
-        readPrivatKey(name);
+
+        readPrivateKey(nameA);
         readPublicKeyAuthServer();
-        readPublicKey(name);
-        String message = "Test";
         try {
-            BigInteger[] sig = generateSignature(message, privateKey);
-            if (checkSignature(publicKeyDB.get(name), sig, message) ) {
-                System.out.print("sig check ok");
-            } else {
-                System.out.print("sig check ok");
-            }
+            readPublicKey(this.nameA, this.nameB);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
     private void readPublicKeyAuthServer() {
         ResultPublicAuthServerSetter setter = new ResultPublicAuthServerSetter() {
@@ -41,32 +41,36 @@ public class ClientDSA {
                 publicKeyDB = pKey;
             }
         };
-        ClientInitPublicAuthServerKeyThread t = new ClientInitPublicAuthServerKeyThread(publicKeyDB, authServerFile);
-        t.setName("ClientInitPublicAuthServerKeyThread");
+        Init_DSA_PublicPKIKey_Thread t = new Init_DSA_PublicPKIKey_Thread(publicKeyDB, authServerFile);
+        t.setName("Init_DSA_PublicPKIKey_Thread");
         t.setResultSetter(setter);
         t.start();
     }
-    private void readPrivatKey(String name) {
+    private void readPrivateKey(String name) {
         ResultPrivateKeySetter setter = new ResultPrivateKeySetter() {
             public void setResultSetter(BigInteger[] pKey) {
                 privateKey = pKey;
             }
         };
 
-        ClientInitPrivateDSAKeyThread t = new ClientInitPrivateDSAKeyThread(name, privateKeyFile );
-        t.setName("ClientInitPrivateDSAKeyThread");
+        Init_DSA_PrivateClientKey_Thread t = new Init_DSA_PrivateClientKey_Thread(name, privateKeyFile );
+        t.setName("Init_DSA_PrivateClientKey_Thread");
         t.setResultSetter(setter);
         t.start();
     }
-    private void readPublicKey(String name) {
+    private void readPublicKey(String nameA, String nameB) throws NoSuchAlgorithmException {
         ResultPublicKeySetter setter = new ResultPublicKeySetter() {
             public void setResultSetter(HashMap<String, BigInteger[]> pKey) {
                 publicKeyDB = pKey;
             }
         };
 
-        ClientInitPublicDSAKeyThread t = new ClientInitPublicDSAKeyThread(name, PORT, publicKeyDB );
-        t.setName("ClientInitPublicDSAKeyThread");
+        DSA dsa = new DSA(privateKey[0], privateKey[1], privateKey[2]);
+        dsa.setPrivatKey(privateKey[3]);
+        String message = nameA + nameB + Integer.toString(logTime);
+        MessagesSend msg = new MessagesSend(nameA, nameB, this.logTime, dsa.sign(message));
+        Search_DSA_Foreign_PublicKey_Thread t = new Search_DSA_Foreign_PublicKey_Thread(nameB, PORT, publicKeyDB, msg);
+        t.setName("Search_DSA_Foreign_PublicKey_Thread");
         t.setResultSetter(setter);
         t.start();
         try {
@@ -74,39 +78,6 @@ public class ClientDSA {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-    }
-    private Boolean checkSignature(BigInteger[] dsaPublicKey, BigInteger[] sig, String message) throws Exception {
-        if (dsaPublicKey.length != 4 ) {
-            throw new Exception("wrong Key");
-        }
-        if (sig.length != 2 ) {
-            throw new Exception("wrong Signature");
-        }
-        DSA dsa_public = new DSA(
-                dsaPublicKey[0],
-                dsaPublicKey[1],
-                dsaPublicKey[2]
-        );
-        dsa_public.setPublicKey(dsaPublicKey[3]);
-        return dsa_public.verify(message, sig);
-    }
-    private BigInteger[] generateSignature(String message, BigInteger[] dsaPrivateKey) throws Exception {
-        if (dsaPrivateKey.length != 4) {
-            throw new Exception("wrong Key");
-        }
-        DSA dsa_private = new DSA(
-                dsaPrivateKey[0],
-                dsaPrivateKey[1],
-                dsaPrivateKey[2]
-        );
-        dsa_private.setPrivatKey(dsaPrivateKey[3]);
-        BigInteger[] sig = dsa_private.sign(message);
-
-        if (sig.length != 2) {
-            throw new Exception("wrong Key");
-        }
-        return sig;
     }
     public static void main(String[] args)  {
         ClientDSA clientDSA = new ClientDSA();

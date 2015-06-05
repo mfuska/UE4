@@ -5,21 +5,24 @@ import DSA.SHA256;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 
 /**
- * Created by mike on 25.05.15.
+ * Created by mike on 04.06.15.
  */
-public class ClientInitPrivateDSAKeyThread extends Thread {
+public class Init_DSA_PublicPKIKey_Thread extends Thread {
 
     private String keyDBFile;
-    private String name;
-    private ResultPrivateKeySetter setter;
+    private ResultPublicAuthServerSetter setter;
 
-    public ClientInitPrivateDSAKeyThread(String name, String keyDBFile) {
-        this.name = name;
+    private HashMap<String, BigInteger[]> publicKeyDB;
+    private String name;
+    public Init_DSA_PublicPKIKey_Thread(HashMap<String, BigInteger[]> publicKeyDB, String keyDBFile) {
+        this.publicKeyDB = publicKeyDB;
         this.keyDBFile = keyDBFile;
+        this.name = new String("authServer");
     }
-    public void setResultSetter(ResultPrivateKeySetter setter) {
+    public void setResultSetter(ResultPublicAuthServerSetter setter) {
         this.setter = setter;
     }
     public void run() {
@@ -33,14 +36,15 @@ public class ClientInitPrivateDSAKeyThread extends Thread {
             while ((line = in.readLine()) != null) {
                 String[] strArray = line.split(" ");
                 if ( strArray[0].equals(sha.hex2String(sha.calculateHash(this.name)))) {
-                    System.out.println(this.getName() + "Found privatKey for user: " + this.name);
+                    System.out.println(this.getName() + " Found publicKey for user: " + this.name);
                     BigInteger[] bigArray = {
                             new BigInteger(strArray[1]),
                             new BigInteger(strArray[2]),
                             new BigInteger(strArray[3]),
                             new BigInteger(strArray[4])
                     };
-                    this.setter.setResultSetter(bigArray);
+                    publicKeyDB.put(sha.hex2String(sha.calculateHash(this.name)), bigArray);
+                    this.setter.setResultSetter(publicKeyDB);
                 }
             }
         } catch (FileNotFoundException e) {

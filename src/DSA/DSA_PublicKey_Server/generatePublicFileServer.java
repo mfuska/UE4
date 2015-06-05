@@ -1,4 +1,4 @@
-package DSA.DSAPublicKeyServer;
+package DSA.DSA_PublicKey_Server;
 
 import DSA.SHA256;
 import DSA.DSA;
