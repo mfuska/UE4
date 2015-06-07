@@ -21,8 +21,8 @@ public class DSA_PublicKey_Server {
     private static BigInteger[] privateKey;
 
     private final static String name = "authServer";
-    private static final String keyDBFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/DSA_PublicKey_Server/publicKey.db";
-    private static final String privateKeyDBFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/DSA_PublicKey_Server/authServerPrivateKey.db";
+    private static final String keyDBFile = "/Volumes/Boxcryptor/Dropbox/FH Campus/IT-Security_encrypted/2.Semester/Kryptographische Protokolle/UE4/UE4/src/DSA/DSA_PublicKey_Server/publicKey.db";
+    private static final String privateKeyDBFile = "/Volumes/Boxcryptor/Dropbox/FH Campus/IT-Security_encrypted/2.Semester/Kryptographische Protokolle/UE4/UE4/src/DSA//DSA_PublicKey_Server/authServerPrivateKey.db";
 
     private static int logTime;
 

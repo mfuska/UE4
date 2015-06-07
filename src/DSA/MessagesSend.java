@@ -1,5 +1,8 @@
 package DSA;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -29,5 +32,18 @@ public class MessagesSend implements Serializable{
     }
     public BigInteger[] getSig() {
         return sig;
+    }
+    public int sizeof()  {
+        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = null;
+        try {
+            objectOutputStream = new ObjectOutputStream(byteOutputStream);
+            objectOutputStream.writeObject(this);
+            objectOutputStream.flush();
+            objectOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return byteOutputStream.toByteArray().length;
     }
 }

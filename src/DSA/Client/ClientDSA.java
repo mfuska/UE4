@@ -12,8 +12,8 @@ import java.util.HashMap;
  */
 public class ClientDSA {
     private final static int PORT = 50001;
-    private final static String privateKeyFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/Client/privateKey.db";
-    private final static String authServerFile = "/Volumes/Daten/Users/mike/2sem/Kryptographische Protokolle/UE4/UE4/src/DSA/Client/authServerPublicKey.db";
+    private final static String privateKeyFile = "/Volumes/Boxcryptor/Dropbox/FH Campus/IT-Security_encrypted/2.Semester/Kryptographische Protokolle/UE4/UE4/src/DSA/Client/privateKey.db";
+    private final static String authServerFile = "/Volumes/Boxcryptor/Dropbox/FH Campus/IT-Security_encrypted/2.Semester/Kryptographische Protokolle/UE4/UE4/src/DSA/Client/authServerPublicKey.db";
 
     private HashMap<String, BigInteger[]> publicKeyDB;
     private BigInteger[] privateKey;

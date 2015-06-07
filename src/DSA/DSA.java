@@ -112,6 +112,7 @@ public class DSA {
             s1 = (g^s mod p) mod q --> wenn s1 = 0 repeat
             s2 = s^-1 (SHA(m) + s1 . x) mod q -->  s2 = 0  s1 new calculate
          */
+        long startTime = System.currentTimeMillis();
         MessageDigest sha2= MessageDigest.getInstance(this.SHA);
         BigInteger msg2sha2 = new BigInteger(sha2.digest(m.getBytes()));
 
@@ -137,6 +138,7 @@ public class DSA {
             System.out.println("s1.bitlength: " + s1.bitLength());
             System.out.println("s2.bitlength: " + s2.bitLength());
         }
+        System.out.println("sign Time:" + (System.currentTimeMillis() - startTime));
         return signature;
     }
 
@@ -155,6 +157,7 @@ public class DSA {
             if (v == s1) --> sig valid
          */
 
+        long startTime = System.currentTimeMillis();
         MessageDigest sha2= MessageDigest.getInstance(this.SHA);
         BigInteger sha2hash = new BigInteger(sha2.digest(m.getBytes()));
 
@@ -168,6 +171,7 @@ public class DSA {
             BigInteger u1 = sha2hash.multiply(w).mod(this.q);
             BigInteger u2 = s1.multiply(w).mod(this.q);
             BigInteger v = this.g.modPow(u1, this.p).multiply(this.y.modPow(u2, this.p)).mod(this.p).mod(this.q);
+            System.out.println("verify Time:" + (System.currentTimeMillis() - startTime));
 
             return v.compareTo(s1) == 0;
         }

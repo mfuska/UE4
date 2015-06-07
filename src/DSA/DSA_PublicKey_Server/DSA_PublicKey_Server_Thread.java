@@ -69,8 +69,10 @@ public class DSA_PublicKey_Server_Thread extends Thread{
         String nameB = msg.getNameB();
         this.logTime = msg.getLogTime() + 1;
 
-        String message = this.name + nameA + Integer.toString(this.logTime);
-        return new MessageResponse(this.name,
+        String message = this.name + nameA + nameB + Integer.toString(this.logTime);
+
+        return new MessageResponse(
+                this.name,
                 nameA,
                 this.logTime,
                 privateDSA.sign(message),
@@ -79,9 +81,15 @@ public class DSA_PublicKey_Server_Thread extends Thread{
     }
 
     private void checkLogicalTime(MessagesSend msg) throws Exception {
+        /* Is not implemented
+        *
+        * Is not part of the UE ;-)
+        *
+
         if (this.logTime > msg.getLogTime()) {
             throw new Exception(this.getClass().getName() + " checkLogicalTime() ERROR: logTime is not correct");
         }
+        */
     }
 
     public void run() {
